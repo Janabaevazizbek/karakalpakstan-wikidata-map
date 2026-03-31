@@ -4,56 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qaraqalpaqstan Wikidata Analiz Kartası</title>
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
-    
     <style>
-        :root { 
-            --primary-blue: #0056b3; 
-            --bg-gray: #f4f7f9; 
-            --wiki-green: #28a745; 
-            --wiki-yellow: #ffc107;
-        }
-        
+        :root { --primary-blue: #0056b3; --bg-gray: #f4f7f9; --wiki-green: #28a745; --wiki-yellow: #ffc107; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-gray); margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        
         header { background: var(--primary-blue); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        
         .container { padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        
         .control-panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; }
-        
-        select { padding: 12px; border-radius: 8px; border: 2px solid #ddd; width: 300px; font-size: 16px; outline: none; cursor: pointer; transition: 0.3s; }
-        select:hover { border-color: var(--primary-blue); }
-        
+        select { padding: 12px; border-radius: 8px; border: 2px solid #ddd; width: 300px; font-size: 16px; outline: none; cursor: pointer; }
         .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        
         .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        
-        /* Siz soraǵan reńli sızıqlar */
-        .card-blue { border-top: 6px solid var(--primary-blue); }   /* Aspan kók */
-        .card-yellow { border-top: 6px solid var(--wiki-yellow); } /* Sarı */
-        .card-green { border-top: 6px solid var(--wiki-green); }   /* Jasıl */
-        
-        .stat-card h3 { margin: 0; font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
+        .card-blue { border-top: 6px solid var(--primary-blue); }
+        .card-yellow { border-top: 6px solid var(--wiki-yellow); }
+        .card-green { border-top: 6px solid var(--wiki-green); }
+        .stat-card h3 { margin: 0; font-size: 13px; color: #666; text-transform: uppercase; }
         .stat-card p { margin: 10px 0 0; font-size: 28px; font-weight: bold; color: #333; }
-        
         #map { height: 500px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 3px solid white; z-index: 1; }
-        
-        /* Popup dizaynı */
         .popup-content { padding: 5px; min-width: 180px; }
         .popup-links { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .popup-links a { text-decoration: none; font-size: 13px; color: white; padding: 8px; border-radius: 5px; text-align: center; transition: 0.3s; font-weight: bold; display: block; }
-        
+        .popup-links a { text-decoration: none; font-size: 13px; color: white; padding: 8px; border-radius: 5px; text-align: center; font-weight: bold; }
         .btn-wiki { background: var(--wiki-green); }
-        .btn-wiki:hover { background: #218838; }
-        
         .btn-wd { background: #6c757d; }
-        .btn-wd:hover { background: #5a6268; }
-        
         .btn-map { background: #007bff; }
-        .btn-map:hover { background: #0069d9; }
     </style>
 </head>
 <body>
@@ -89,18 +62,9 @@
     </div>
 
     <div class="stats-bar">
-        <div class="stat-card card-blue">
-            <h3><i class="fas fa-map-marked-alt"></i> Jámi orınlar</h3>
-            <p id="stat-total">0</p>
-        </div>
-        <div class="stat-card card-yellow">
-            <h3><i class="fab fa-wikipedia-w"></i> Wikipediada maqalası bar</h3>
-            <p id="stat-wiki">0</p>
-        </div>
-        <div class="stat-card card-green">
-            <h3><i class="fas fa-bolt"></i> Izlew tezligi (ms)</h3>
-            <p id="stat-time">0</p>
-        </div>
+        <div class="stat-card card-blue"><h3><i class="fas fa-map-marked-alt"></i> Jámi orınlar</h3><p id="stat-total">0</p></div>
+        <div class="stat-card card-yellow"><h3><i class="fab fa-wikipedia-w"></i> Wikipediada maqalası bar</h3><p id="stat-wiki">0</p></div>
+        <div class="stat-card card-green"><h3><i class="fas fa-bolt"></i> Izlew tezligi (ms)</h3><p id="stat-time">0</p></div>
     </div>
 
     <div id="map"></div>
@@ -109,9 +73,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     var map = L.map('map').setView([43.5, 59.8], 6.4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
     var markers = L.layerGroup().addTo(map);
 
@@ -122,6 +84,7 @@
         var startTime = performance.now();
         markers.clearLayers();
 
+        // SPARQL DÚZETILDI
         var sparqlQuery = `SELECT ?item ?itemLabel ?koordinat ?article WHERE { 
             ?item wdt:P131 wd:${ilceId}. 
             ?item wdt:P625 ?koordinat. 
@@ -129,7 +92,7 @@
               ?article schema:about ?item ; 
                        schema:isPartOf <https://kaa.wikipedia.org/> .
             }
-            SERVICE wikibase:label { bd:serviceParam wikibase:label { bd:serviceParam wikibase:language "kaa,en,tr". } } 
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "kaa,en,ru". } 
         }`;
 
         var url = 'https://query.wikidata.org/sparql?query=' + encodeURIComponent(sparqlQuery);
@@ -147,29 +110,17 @@
                     var coords = result.koordinat.value.replace('Point(', '').replace(')', '').split(' ');
                     var lon = parseFloat(coords[0]);
                     var lat = parseFloat(coords[1]);
-                    var label = result.itemLabel ? result.itemLabel.value : "Atsız orın";
+                    var label = result.itemLabel ? result.itemLabel.value : "Atsız";
                     var qId = result.item.value.split('/').pop();
-                    
                     var wikiLink = result.article ? result.article.value : "";
                     if(wikiLink) wikiCount++;
 
-                    var popupHTML = `
-                        <div class="popup-content">
-                            <b>${label}</b><br>
-                            <small style="color:#666;">Wikidata ID: ${qId}</small>
-                            <div class="popup-links">
-                    `;
-                    
-                    if(wikiLink) {
-                        popupHTML += `<a href="${wikiLink}" target="_blank" class="btn-wiki"><i class="fab fa-wikipedia-w"></i> Wikipedia</a>`;
-                    }
-                    
+                    var popupHTML = `<div class="popup-content"><b>${label}</b><br><small>ID: ${qId}</small><div class="popup-links">`;
+                    if(wikiLink) popupHTML += `<a href="${wikiLink}" target="_blank" class="btn-wiki"><i class="fab fa-wikipedia-w"></i> Wikipedia</a>`;
                     popupHTML += `
-                                <a href="${result.item.value}" target="_blank" class="btn-wd"><i class="fas fa-database"></i> Wikidata</a>
-                                <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="btn-map"><i class="fas fa-map-marker-alt"></i> Google Maps</a>
-                            </div>
-                        </div>
-                    `;
+                        <a href="${result.item.value}" target="_blank" class="btn-wd"><i class="fas fa-database"></i> Wikidata</a>
+                        <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="btn-map"><i class="fas fa-map-marker-alt"></i> Google Maps</a>
+                    </div></div>`;
 
                     L.marker([lat, lon]).addTo(markers).bindPopup(popupHTML);
                 });
@@ -183,7 +134,6 @@
             })
             .catch(err => {
                 console.error('Qátelik:', err);
-                alert("Maǵlıwmatlardı júklewde qátelik júz berdi.");
             });
     });
 </script>
