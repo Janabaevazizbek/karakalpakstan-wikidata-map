@@ -4,76 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Qaraqalpaqstan Wikidata Analiz Kartası</title>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    
     <style>
-        :root { --primary-blue: #0056b3; --bg-gray: #f4f7f9; --wiki-green: #28a745; --wiki-yellow: #ffc107; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-gray); margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        header { background: var(--primary-blue); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
-        .container { padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
-        .control-panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; }
-        select { padding: 12px; border-radius: 8px; border: 2px solid #ddd; width: 300px; font-size: 16px; outline: none; cursor: pointer; }
-        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        :root { 
+            --primary-blue: #0056b3; 
+            --bg-gray: #f4f7f9; 
+            --wiki-green: #28a745; 
+            --wiki-yellow: #ffc107;
+        }
+        
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-gray); margin: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        header { background: var(--primary-blue); color: white; padding: 30px 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        header h1 { margin: 0; font-size: 26px; letter-spacing: 0.5px; }
+        header .description { max-width: 900px; margin: 15px auto 0; font-size: 15px; opacity: 0.95; line-height: 1.6; }
+        
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; flex: 1; }
+        
+        .control-panel { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; }
+        
+        /* Tekst ishinde kók siltemeler ushın stil */
+        .info-text { font-size: 14.5px; color: #444; margin-top: 20px; line-height: 1.5; border-top: 1px solid #eee; padding-top: 15px; }
+        .info-text a { color: var(--primary-blue); text-decoration: none; font-weight: bold; border-bottom: 1px dashed var(--primary-blue); }
+        .info-text a:hover { color: #003d80; border-bottom-style: solid; }
+        
+        select { padding: 12px; border-radius: 8px; border: 2px solid #ddd; width: 320px; font-size: 16px; outline: none; cursor: pointer; transition: 0.3s; }
+        select:hover { border-color: var(--primary-blue); }
+        
+        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 18px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        
+        /* Reńli sızıqlar ierarxiyası */
         .card-blue { border-top: 6px solid var(--primary-blue); }
         .card-yellow { border-top: 6px solid var(--wiki-yellow); }
         .card-green { border-top: 6px solid var(--wiki-green); }
-        .stat-card h3 { margin: 0; font-size: 13px; color: #666; text-transform: uppercase; }
-        .stat-card p { margin: 10px 0 0; font-size: 28px; font-weight: bold; color: #333; }
-        #map { height: 500px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 3px solid white; z-index: 1; }
-        .popup-content { padding: 5px; min-width: 180px; }
+        
+        .stat-card h3 { margin: 0; font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 0.8px; }
+        .stat-card p { margin: 10px 0 0; font-size: 30px; font-weight: bold; color: #222; }
+        
+        #map { height: 550px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 4px solid white; z-index: 1; }
+        
+        footer { text-align: center; padding: 20px; color: #999; font-size: 12.5px; border-top: 1px solid #e0e0e0; margin-top: 20px; }
+        footer b { color: #666; }
+
+        /* Popup elementleri */
+        .popup-content { padding: 5px; min-width: 190px; }
         .popup-links { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .popup-links a { text-decoration: none; font-size: 13px; color: white; padding: 8px; border-radius: 5px; text-align: center; font-weight: bold; }
+        .popup-links a { text-decoration: none; font-size: 13px; color: white; padding: 9px; border-radius: 6px; text-align: center; font-weight: bold; transition: 0.2s; }
         .btn-wiki { background: var(--wiki-green); }
         .btn-wd { background: #6c757d; }
         .btn-map { background: #007bff; }
+        .popup-links a:hover { opacity: 0.9; transform: scale(1.02); }
     </style>
 </head>
 <body>
 
 <header>
     <h1>🌍 Qaraqalpaqstan Respublikasınıń Wikidatadaǵı maǵlıwmatlar kartası</h1>
-    <p>Rayonlardaǵı orınlardıń statistikalıq analizi hám Wikipedia maqalaları</p>
+    <p class="description">
+        Bul karta Qaraqalpaqstan Respublikasınıń interaktiv kartası bolıp, onda tariyxıy estelikler, xalıq punktleri, meshitler, mektepler hám basqa da áhmiyetli imaratlar kórsetilgen. Aymaqtı saylaw arqalı sol aymaqtaǵı barlıq orınlardı kórseńiz boladı.
+    </p>
 </header>
 
 <div class="container">
     <div class="control-panel">
-        <label style="font-weight: bold; margin-right: 15px; font-size: 18px;">Rayondı saylań:</label>
-        <select id="ilce-sec">
-            <option value=""> Aymaqtı saylań </option>
-            <option value="Q2603639">Ámiwdárya rayonı</option>
-            <option value="Q2603530">Beruniy rayonı</option>
-            <option value="Q12820397">Bozataw rayonı</option>
-            <option value="Q939147">Ellikqala rayonı</option>
-            <option value="Q2603630">Xojeli rayonı</option>
-            <option value="Q2609556">Kegeyli rayonı</option>
-            <option value="Q2603644">Qanlıkól rayonı</option>
-            <option value="Q2609548">Qaraózek rayonı</option>
-            <option value="Q2609569">Qońırat rayonı</option>
-            <option value="Q2603621">Moynaq rayonı</option>
-            <option value="Q489898">Nókis qalası</option>
-            <option value="Q2603584">Nókis rayonı</option>
-            <option value="Q2603597">Taxtakópir rayonı</option>
-            <option value="Q2642167">Tórtkúl rayonı</option>
-            <option value="Q55664316">Taqıyatas rayonı</option>
-            <option value="Q2609551">Shımbay rayonı</option>
-            <option value="Q693197">Shomanay rayonı</option>
-        </select>
+        <div style="margin-bottom: 5px;">
+            <label style="font-weight: bold; margin-right: 15px; font-size: 18px; color: #333;">Aymaqtı saylań:</label>
+            <select id="ilce-sec">
+                <option value=""> -- Rayondı saylań -- </option>
+                <option value="Q2603639">Ámiwdárya rayonı</option>
+                <option value="Q2603530">Beruniy rayonı</option>
+                <option value="Q12820397">Bozataw rayonı</option>
+                <option value="Q939147">Ellikqala rayonı</option>
+                <option value="Q2603630">Xojeli rayonı</option>
+                <option value="Q2609556">Kegeyli rayonı</option>
+                <option value="Q2603644">Qanlıkól rayonı</option>
+                <option value="Q2609548">Qaraózek rayonı</option>
+                <option value="Q2609569">Qońırat rayonı</option>
+                <option value="Q2603621">Moynaq rayonı</option>
+                <option value="Q489898">Nókis qalası</option>
+                <option value="Q2603584">Nókis rayonı</option>
+                <option value="Q2603597">Taxtakópir rayonı</option>
+                <option value="Q2642167">Tórtkúl rayonı</option>
+                <option value="Q55664316">Taqıyatas rayonı</option>
+                <option value="Q2609551">Shımbay rayonı</option>
+                <option value="Q693197">Shomanay rayonı</option>
+            </select>
+        </div>
+        
+        <p class="info-text">
+            <i class="fas fa-info-circle"></i> Karta maǵlıwmatları 
+            <a href="https://kaa.wikipedia.org/" target="_blank">Qaraqalpaqsha Wikipedia</a>, 
+            <a href="https://www.wikidata.org/" target="_blank">Wikidata</a> hám 
+            <a href="https://www.google.com/maps/search/?api=1&query=$" target="_blank">Google Maps</a> 
+            xızmetleri tiykarında islengen. Eger kartada qanday da bir qátelik kórseńiz, sol orınnıń 'Wikidata beti' yamasa 'Wikipedia' túymesi arqalı kirip, maǵlıwmatlardı ózińiz dúzetseńiz boladı.
+        </p>
     </div>
 
     <div class="stats-bar">
-        <div class="stat-card card-blue"><h3><i class="fas fa-map-marked-alt"></i> Jámi orınlar</h3><p id="stat-total">0</p></div>
-        <div class="stat-card card-yellow"><h3><i class="fab fa-wikipedia-w"></i> Wikipediada maqalası bar</h3><p id="stat-wiki">0</p></div>
-        <div class="stat-card card-green"><h3><i class="fas fa-bolt"></i> Izlew tezligi (ms)</h3><p id="stat-time">0</p></div>
+        <div class="stat-card card-blue">
+            <h3><i class="fas fa-layer-group"></i> Jámi orınlar</h3>
+            <p id="stat-total">0</p>
+        </div>
+        <div class="stat-card card-yellow">
+            <h3><i class="fab fa-wikipedia-w"></i> Wikipediada maqalası bar</h3>
+            <p id="stat-wiki">0</p>
+        </div>
+        <div class="stat-card card-green">
+            <h3><i class="fas fa-bolt"></i> Izlew tezligi (ms)</h3>
+            <p id="stat-time">0</p>
+        </div>
     </div>
 
     <div id="map"></div>
 </div>
 
+<footer>
+    Joybar avtorı: <b>Jańabaev Azizbek</b> | 2026 | Qaraqalpaq tilin cifrlastırıw
+</footer>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     var map = L.map('map').setView([43.5, 59.8], 6.4);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
 
     var markers = L.layerGroup().addTo(map);
 
@@ -84,7 +142,7 @@
         var startTime = performance.now();
         markers.clearLayers();
 
-        // SPARQL DÚZETILDI
+        // SPARQL Sorawı: Wikipedia maqalasın da birge keledi
         var sparqlQuery = `SELECT ?item ?itemLabel ?koordinat ?article WHERE { 
             ?item wdt:P131 wd:${ilceId}. 
             ?item wdt:P625 ?koordinat. 
@@ -92,7 +150,7 @@
               ?article schema:about ?item ; 
                        schema:isPartOf <https://kaa.wikipedia.org/> .
             }
-            SERVICE wikibase:label { bd:serviceParam wikibase:language "kaa,en,ru". } 
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "kaa,en,tr". } 
         }`;
 
         var url = 'https://query.wikidata.org/sparql?query=' + encodeURIComponent(sparqlQuery);
@@ -110,26 +168,39 @@
                     var coords = result.koordinat.value.replace('Point(', '').replace(')', '').split(' ');
                     var lon = parseFloat(coords[0]);
                     var lat = parseFloat(coords[1]);
-                    var label = result.itemLabel ? result.itemLabel.value : "Atsız";
+                    var label = result.itemLabel ? result.itemLabel.value : "Atsız orın";
                     var qId = result.item.value.split('/').pop();
+                    
                     var wikiLink = result.article ? result.article.value : "";
                     if(wikiLink) wikiCount++;
 
-                    var popupHTML = `<div class="popup-content"><b>${label}</b><br><small>ID: ${qId}</small><div class="popup-links">`;
-                    if(wikiLink) popupHTML += `<a href="${wikiLink}" target="_blank" class="btn-wiki"><i class="fab fa-wikipedia-w"></i> Wikipedia</a>`;
+                    var popupHTML = `
+                        <div class="popup-content">
+                            <b style="font-size:15px; color:#222;">${label}</b><br>
+                            <small style="color:#777;">ID: ${qId}</small>
+                            <div class="popup-links">
+                    `;
+                    
+                    if(wikiLink) {
+                        popupHTML += `<a href="${wikiLink}" target="_blank" class="btn-wiki"><i class="fab fa-wikipedia-w"></i> Wikipedia</a>`;
+                    }
+                    
                     popupHTML += `
-                        <a href="${result.item.value}" target="_blank" class="btn-wd"><i class="fas fa-database"></i> Wikidata</a>
-                        <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" class="btn-map"><i class="fas fa-map-marker-alt"></i> Google Maps</a>
-                    </div></div>`;
+                                <a href="${result.item.value}" target="_blank" class="btn-wd"><i class="fas fa-database"></i> Wikidata beti</a>
+                                <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" class="btn-map"><i class="fas fa-map-marker-alt"></i> Google Maps</a>
+                            </div>
+                        </div>
+                    `;
 
                     L.marker([lat, lon]).addTo(markers).bindPopup(popupHTML);
                 });
                 
                 document.getElementById('stat-wiki').innerText = wikiCount;
 
+                // Aymaqtı saylaǵanda rayonǵa avtomat jaqınlastırıw
                 if (results.length > 0) {
                     var group = new L.featureGroup(markers.getLayers());
-                    map.flyToBounds(group.getBounds(), { padding: [40, 40], duration: 1.5 });
+                    map.flyToBounds(group.getBounds(), { padding: [50, 50], duration: 1.5 });
                 }
             })
             .catch(err => {
