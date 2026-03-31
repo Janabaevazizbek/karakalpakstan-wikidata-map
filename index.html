@@ -3,97 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Qaraqalpaqstan Wikidata Kartası</title>
-    
+    <title>Qaraqalpaqstan Respublikasınıń Wikidata analiz kartası</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
-        header { background-color: #0056b3; color: white; padding: 15px; text-align: center; }
-        select { padding: 10px; margin: 10px; width: 300px; font-size: 16px; }
-        #map-container { flex-grow: 1; position: relative; }
-        #map { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+        :root { --primary-blue: #0056b3; --bg-gray: #f4f7f9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-gray); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        header { background: var(--primary-blue); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        .control-panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; }
+        select { padding: 12px; border-radius: 8px; border: 2px solid #ddd; width: 300px; font-size: 16px; outline: none; cursor: pointer; }
+        .stats-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-top: 5px solid var(--primary-blue); }
+        .stat-card h3 { margin: 0; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card p { margin: 10px 0 0; font-size: 28px; font-weight: bold; color: var(--primary-blue); }
+        #map { height: 500px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 3px solid white; z-index: 1; }
+        .popup-content { padding: 5px; }
+        .popup-links { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .popup-links a { text-decoration: none; font-size: 13px; color: #ffffff; background: #007bff; padding: 5px 10px; border-radius: 4px; text-align: center; transition: 0.3s; }
+        .popup-links a:hover { background: #0056b3; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Qaraqalpaqstan Respublikasınıń Wikidatadaǵı maǵlıwmatlar kartası</h1>
-    <p>Qaraqalpaqstan rayonlarındaǵı Wikidata maǵlıwmatların analizlew</p>
+    <h1>🌍 Qaraqalpaqstan Respublikasınıń Wikidatadaǵı maǵlıwmatlar kartası</h1>
+    <p>Aymaqlardaǵı mádeniy hám geografiyalıq orınlardıń statistikalıq analizi</p>
 </header>
 
-<div style="text-align: center;">
-    <label for="ilce-sec">Rayondı saylań:</label>
-    <select id="ilce-sec">
-        <option value=""> Aymaqtı saylań </option>
-        <option value="Q2603639">Ámiwdárya rayonı</option>
-        <option value="Q2603530">Beruniy rayonı</option>
-        <option value="Q12820397">Bozataw rayonı</option>
-        <option value="Q939147">Ellikqala rayonı</option>
-        <option value="Q2603630">Xojeli rayonı</option>
-        <option value="Q2609556">Kegeyli rayonı</option>
-        <option value="Q2603644">Qanlıkól rayonı</option>
-        <option value="Q2609548">Qaraózek rayonı</option>
-        <option value="Q2609569">Qońırat rayonı</option>
-        <option value="Q2603621">Moynaq rayonı</option>
-        <option value="Q489898">Nókis qalası</option>
-        <option value="Q2603584">Nókis rayonı</option>
-        <option value="Q2603597">Taxtakópir rayonı</option>
-        <option value="Q2642167">Tórtkúl rayonı</option>
-        <option value="Q55664316">Taqıyatas rayonı</option>
-        <option value="Q2609551">Shımbay rayonı</option>
-        <option value="Q693197">Shomanay rayonı</option>
-    </select>
-</div>
+<div class="container">
+    <div class="control-panel">
+        <label style="font-weight: bold; margin-right: 15px; font-size: 18px;">Rayondı saylań:</label>
+        <select id="ilce-sec">
+            <option value=""> Aymaqtı saylań </option>
+            <option value="Q2603639">Ámiwdárya rayonı</option>
+            <option value="Q2603530">Beruniy rayonı</option>
+            <option value="Q12820397">Bozataw rayonı</option>
+            <option value="Q939147">Ellikqala rayonı</option>
+            <option value="Q2603630">Xojeli rayonı</option>
+            <option value="Q2609556">Kegeyli rayonı</option>
+            <option value="Q2603644">Qanlıkól rayonı</option>
+            <option value="Q2609548">Qaraózek rayonı</option>
+            <option value="Q2609569">Qońırat rayonı</option>
+            <option value="Q2603621">Moynaq rayonı</option>
+            <option value="Q489898">Nókis qalası</option>
+            <option value="Q2603584">Nókis rayonı</option>
+            <option value="Q2603597">Taxtakópir rayonı</option>
+            <option value="Q2642167">Tórtkúl rayonı</option>
+            <option value="Q55664316">Taqıyatas rayonı</option>
+            <option value="Q2609551">Shımbay rayonı</option>
+            <option value="Q693197">Shomanay rayonı</option>
+        </select>
+    </div>
 
-<div id="map-container">
+    <div class="stats-bar">
+        <div class="stat-card"><h3>Jámi tabılǵan orınlar</h3><p id="stat-total">0</p></div>
+        <div class="stat-card"><h3>Koordinatası bar</h3><p id="stat-coord">0</p></div>
+        <div class="stat-card"><h3>Soraw uzınlıǵı (ms)</h3><p id="stat-time">0</p></div>
+    </div>
+
     <div id="map"></div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    // Haritayı Karakalpakistan'a (Nókis merkezli) odaklayarak başlattık
-    var map = L.map('map').setView([43.5, 59.8], 6.3); 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    // Haritayı Karakalpakistan'ın kalbine [43.5, 59.8] ve zoom 6.4 olarak yerleştirdik
+    var map = L.map('map').setView([43.5, 59.8], 6.4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-    var currentLayer = L.layerGroup().addTo(map); // Noktaları tutacak katman
+    var markers = L.layerGroup().addTo(map);
 
-    // Menüden bir ilçe seçildiğinde çalışacak "Sihirli" JavaScript kodu
     document.getElementById('ilce-sec').addEventListener('change', function(e) {
         var ilceId = e.target.value;
         if (!ilceId) return;
 
-        currentLayer.clearLayers(); // Eski noktaları sil
+        var startTime = performance.now();
+        markers.clearLayers();
 
-        // Wikidata'ya gönderilecek SPARQL sorgusunu hazırladık (Seçilen ilçe ID'si ile)
-        var sparqlQuery = `
-            SELECT ?item ?itemLabel ?koordinat
-            WHERE {
-                ?item wdt:P131 wd:${ilceId}. 
-                ?item wdt:P625 ?koordinat. 
-                SERVICE wikibase:label { bd:serviceParam wikibase:language "kaa,en,tr". }
-            }
-        `;
+        // SPARQL Sorgusu
+        var sparqlQuery = `SELECT ?item ?itemLabel ?koordinat WHERE { 
+            ?item wdt:P131 wd:${ilceId}. 
+            ?item wdt:P625 ?koordinat. 
+            SERVICE wikibase:label { bd:serviceParam wikibase:language "kaa,en,tr". } 
+        }`;
 
-        // Wikidata Sorgu Servisine (SPARQL endpoint) veriyi gönderiyoruz
         var url = 'https://query.wikidata.org/sparql?query=' + encodeURIComponent(sparqlQuery);
 
         fetch(url, { headers: { 'Accept': 'application/sparql-results+json' } })
-            .then(response => response.json())
+            .then(res => res.json())
             .then(data => {
-                // Gelen verileri döngüye alıp haritaya noktalar basıyoruz
-                data.results.bindings.forEach(result => {
-                    var koordinatStr = result.koordinat.value.replace('Point(', '').replace(')', '');
-                    var coords = koordinatStr.split(' ');
-                    var lat = parseFloat(coords[1]);
+                var results = data.results.bindings;
+                
+                // Statistikalardı jańalaw
+                document.getElementById('stat-total').innerText = results.length;
+                document.getElementById('stat-coord').innerText = results.length;
+                document.getElementById('stat-time').innerText = Math.round(performance.now() - startTime);
+
+                results.forEach(result => {
+                    var coords = result.koordinat.value.replace('Point(', '').replace(')', '').split(' ');
                     var lon = parseFloat(coords[0]);
+                    var lat = parseFloat(coords[1]);
+                    var qId = result.item.value.split('/').pop();
                     var label = result.itemLabel.value;
 
-                    // Haritaya interaktif bir nokta ekle
-                    L.marker([lat, lon]).addTo(currentLayer).bindPopup(`<b>${label}</b>`);
+                    var popupHTML = `
+                        <div class="popup-content">
+                            <b>${label}</b><br>
+                            <small style="color:#666">Wikidata ID: ${qId}</small>
+                            <div class="popup-links">
+                                <a href="${result.item.value}" target="_blank">🔍 Wikidata beti</a>
+                                <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank">📍 Google Maps</a>
+                                <a href="https://yandex.com/maps/?ll=${lon},${lat}&z=16&text=${lat},${lon}" target="_blank">🗺️ Yandex Maps</a>
+                            </div>
+                        </div>
+                    `;
+
+                    L.marker([lat, lon]).addTo(markers).bindPopup(popupHTML);
                 });
+                
+                // Eğer veri geldiyse haritayı o bölgeye hafifçe yaklaştır
+                if (results.length > 0) {
+                    var group = new L.featureGroup(markers.getLayers());
+                    map.flyToBounds(group.getBounds(), { padding: [50, 50], duration: 1.5 });
+                }
             })
-            .catch(error => console.error('Qátelik:', error));
+            .catch(err => console.error('Hata:', err));
     });
 </script>
 
